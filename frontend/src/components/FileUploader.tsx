@@ -1,21 +1,32 @@
-import { useState } from "react"
+import { useState } from "react";
 
 interface FileUploaderProps {
-    onFileSelect: (file: file) => void
+  onFileSelect: (file: File) => void;
 }
 
-function FileUploader({onFileSelect}:){
-    const [modalVisibility, setModalVisibility] = useState(false)
-    const handleFileUpload = () => {
-        setModalVisibility(!modalVisibility)
-
+function FileUploader({ onFileSelect }: FileUploaderProps) {
+  const [modalVisibility, setModalVisibility] = useState(false);
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onFileSelect(file);
+      setModalVisibility(false);
     }
-    const button = (<button onClick={handleFileUpload}>Upload</button>)
-    return (
-        <div>
+  };
 
+  const handleOpenModal = () => setModalVisibility(true);
+
+  return (
+    <div>
+      <button onClick={handleOpenModal}>Upload</button>
+      {modalVisibility && (
+        <div>
+          <h2>Upload file here</h2>
+          <input type="file" onChange={handleFileUpload} />
         </div>
-    )
+      )}
+    </div>
+  );
 }
 
-export default FileUploader
+export default FileUploader;
