@@ -1,8 +1,16 @@
 from transcribe import transcribe_to_audio
 from fastapi import FastAPI, UploadFile 
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.post("/transcribe")
 async def initial_upload(file: UploadFile):
