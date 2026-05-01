@@ -13,6 +13,8 @@ interface PianoRollProps {
   isPlaying: boolean;
   currentTime: number;
   onTimeUpdate: (time: number) => void;
+  seekTime: number;
+  seekTrigger: number;
 }
 
 // Piano range constants
@@ -24,7 +26,7 @@ const PITCH_COUNT = MAX_PITCH - MIN_PITCH + 1; // 88 keys
 // Controls when the notes start appearing at the top.
 const VISIBLE_SECONDS = 4;
 
-export default function PianoRoll({ midiBlob, isPlaying, currentTime, onTimeUpdate }: PianoRollProps) {
+export default function PianoRoll({ midiBlob, isPlaying, currentTime, onTimeUpdate, seekTime, seekTrigger }: PianoRollProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameId = useRef<number>(0);
   const startTimestampRef = useRef<number>(0);  // performance.now() when playback started
@@ -163,6 +165,11 @@ export default function PianoRoll({ midiBlob, isPlaying, currentTime, onTimeUpda
     // Cleanup when component unmounts or dependencies change
     return () => cancelAnimationFrame(animationFrameId.current);
   }, [isPlaying, notes]);
+
+  useEffect(() => {
+    pausedAtRef.current = seekTime
+    startTimestampRef.current = performance.now() - seekTime * 1000
+  }, [seekTrigger])
 
   return (
     <canvas
