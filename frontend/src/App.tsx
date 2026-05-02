@@ -5,6 +5,7 @@ import PianoRoll from "./components/PianoRoll";
 import PlaybackControls from "./components/PlaybackControls";
 
 import parseMidi from "./utils/parseMidi"
+import PianoKeyboard from "./components/PianoKeyboard";
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
   const [seekTrigger, setSeekTrigger] = useState(0)
 
   const [notes, setNotes] = useState([])
+  const [activeNotes, setActiveNotes] = useState([])
 
   // Handling the parsing at the top for convenient passing of the active notes.
   useEffect(() => {
@@ -71,13 +73,15 @@ function App() {
       <FileUploader onFileSelect={uploadFile} />
       <PianoRoll
         isPlaying={isPlaying}
-        currentTime={currentTime}
         onTimeUpdate={handleTimeUpdate}
         seekTime={seekTime}
         seekTrigger={seekTrigger}
         notes={notes}
-        
+        onActiveNotesChange={(active) => setActiveNotes(active)}
       />
+
+      <PianoKeyboard activeNotes={activeNotes}/>
+
       {!isLoading ? (
         <PlaybackControls
           isPlaying={isPlaying}

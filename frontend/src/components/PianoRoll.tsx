@@ -4,11 +4,11 @@ import type { Note } from "../types";
 
 interface PianoRollProps {
   isPlaying: boolean;
-  currentTime: number;
   onTimeUpdate: (time: number) => void;
   seekTime: number;
   seekTrigger: number;
   notes: Note[];
+  onActiveNotesChange: (notes: Note[]) => void
 }
 
 // Piano range constants
@@ -20,7 +20,7 @@ const PITCH_COUNT = MAX_PITCH - MIN_PITCH + 1; // 88 keys
 // Controls when the notes start appearing at the top.
 const VISIBLE_SECONDS = 4;
 
-export default function PianoRoll({ isPlaying, currentTime, onTimeUpdate, seekTime, seekTrigger, notes }: PianoRollProps) {
+export default function PianoRoll({ isPlaying, onTimeUpdate, seekTime, seekTrigger, notes, onActiveNotesChange }: PianoRollProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameId = useRef<number>(0);
   const startTimestampRef = useRef<number>(0);  // performance.now() when playback started
@@ -44,6 +44,8 @@ export default function PianoRoll({ isPlaying, currentTime, onTimeUpdate, seekTi
       const draw = (timestamp: number) => {
         // Calculate how many seconds have elapsed since playback started
         const elapsed = (timestamp - startTimestampRef.current) / 1000;
+        const active = notes.filter(note => elapsed >= note.startTime && elapsed <= note.endTime)
+        onActiveNotesChange(active)
         onTimeUpdate(elapsed);
         pausedAtRef.current = elapsed;
 
