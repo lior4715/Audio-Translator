@@ -1,20 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import { Midi } from "@tonejs/midi";
+import { useEffect, useRef } from "react";
+import type { Note } from "../types";
 
-// Representing a note parsed from the MIDI.
-interface Note {
-  startTime: number;  // in seconds
-  endTime: number;    // in seconds
-  pitch: number;      // MIDI number (21-108 for piano)
-}
 
 interface PianoRollProps {
-  midiBlob: Blob | null;
   isPlaying: boolean;
   currentTime: number;
   onTimeUpdate: (time: number) => void;
   seekTime: number;
   seekTrigger: number;
+  notes: Note[];
 }
 
 // Piano range constants
@@ -26,40 +20,13 @@ const PITCH_COUNT = MAX_PITCH - MIN_PITCH + 1; // 88 keys
 // Controls when the notes start appearing at the top.
 const VISIBLE_SECONDS = 4;
 
-export default function PianoRoll({ midiBlob, isPlaying, currentTime, onTimeUpdate, seekTime, seekTrigger }: PianoRollProps) {
+export default function PianoRoll({ isPlaying, currentTime, onTimeUpdate, seekTime, seekTrigger, notes }: PianoRollProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameId = useRef<number>(0);
   const startTimestampRef = useRef<number>(0);  // performance.now() when playback started
   const pausedAtRef = useRef<number>(0);         // currentTime value when paused
 
-  const [notes, setNotes] = useState<Note[]>([]);
-
-  // Parse the MIDI blob whenever it changes.
-  useEffect(() => {
-    if (!midiBlob) return;
-
-    const parseMidi = async () => {
-      // Convert blob to ArrayBuffer so @tonejs/midi can read it
-      const arrayBuffer = await midiBlob.arrayBuffer();
-      const midi = new Midi(arrayBuffer);
-
-      // Push all tracks into a single array of notes.
-      const parsedNotes: Note[] = [];
-      midi.tracks.forEach((track) => {
-        track.notes.forEach((note) => {
-          parsedNotes.push({
-            startTime: note.time,
-            endTime: note.time + note.duration,
-            pitch: note.midi,
-          });
-        });
-      });
-
-      setNotes(parsedNotes);
-    };
-
-    parseMidi();
-  }, [midiBlob]);
+  
 
   // Animation loop — starts/stops the animation based on isPlaying.
   useEffect(() => {

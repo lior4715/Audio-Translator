@@ -1,7 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useEffect } from "react";
+
 import FileUploader from "./components/FileUploader";
 import PianoRoll from "./components/PianoRoll";
 import PlaybackControls from "./components/PlaybackControls";
+
+import parseMidi from "./utils/parseMidi"
+
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,6 +15,19 @@ function App() {
 
   const [seekTime, setSeekTime] = useState(0);
   const [seekTrigger, setSeekTrigger] = useState(0)
+
+  const [notes, setNotes] = useState([])
+
+  // Handling the parsing at the top for convenient passing of the active notes.
+  useEffect(() => {
+    const parse = async () => {
+      const parsedNotes = await parseMidi(midiBlob)
+      setNotes(parsedNotes)
+    }
+
+    parse()
+  }, [midiBlob])
+
 
   const uploadFile = async (file: File) => {
     const formData = new FormData();
@@ -53,12 +70,13 @@ function App() {
       <h1>Audio Translator</h1>
       <FileUploader onFileSelect={uploadFile} />
       <PianoRoll
-        midiBlob={midiBlob}
         isPlaying={isPlaying}
         currentTime={currentTime}
         onTimeUpdate={handleTimeUpdate}
         seekTime={seekTime}
         seekTrigger={seekTrigger}
+        notes={notes}
+        
       />
       {!isLoading ? (
         <PlaybackControls
